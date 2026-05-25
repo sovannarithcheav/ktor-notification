@@ -40,6 +40,7 @@ class EmailChannel(
         userId: Long,
         title: String,
         body: String,
+        subject: String?,
         mergeFields: Map<String, String>,
     ): DispatchResult {
         val email = userEmailResolver.resolve(userId)

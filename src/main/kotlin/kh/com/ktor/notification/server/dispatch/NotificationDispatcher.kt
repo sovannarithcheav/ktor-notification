@@ -25,6 +25,7 @@ class NotificationDispatcher(private val channels: Map<Long, NotificationChannel
             userId      = request.userId,
             title       = request.title,
             body        = resolved.body,
+            subject     = request.subject,
             mergeFields = request.mergeFields,
         )
     }

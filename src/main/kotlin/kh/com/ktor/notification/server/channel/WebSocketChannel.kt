@@ -2,8 +2,18 @@ package kh.com.ktor.notification.server.channel
 
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
+
+@Serializable
+data class PushMessage(
+    val eventCode: String,
+    val title: String,
+    val body: String,
+)
 
 object WebSocketSessionManager {
 
@@ -42,9 +52,15 @@ class WebSocketChannel(
         userId: Long,
         title: String,
         body: String,
+        subject: String?,
         mergeFields: Map<String, String>,
     ): DispatchResult {
-        WebSocketSessionManager.send(userId, body)
+        val payload = Json.encodeToString(PushMessage(
+            eventCode = subject ?: "",
+            title     = title,
+            body      = body,
+        ))
+        WebSocketSessionManager.send(userId, payload)
         val connected = WebSocketSessionManager.isConnected(userId)
         return DispatchResult(
             success = true,

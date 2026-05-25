@@ -1,7 +1,6 @@
 package kh.com.ktor.notification.server.service
 
 import kh.com.ktor.notification.server.NotificationServerDefaults
-import kh.com.ktor.notification.server.channel.WebSocketSessionManager
 import kh.com.ktor.notification.server.dispatch.DispatchRequest
 import kh.com.ktor.notification.server.entity.UserWebNotificationCreate
 import kh.com.ktor.notification.server.enums.AuditAction
@@ -10,8 +9,6 @@ import kh.com.ktor.notification.server.repository.UserSubscriptionRepository
 import kh.com.ktor.notification.server.repository.UserWebNotificationRepository
 import kh.com.ktor.notification.server.security.UserInfo
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 private object ChannelId {
     const val EMAIL    = 1L
@@ -31,13 +28,6 @@ data class SendNotificationRequest(
 data class SendNotificationResponse(
     val success: Boolean,
     val message: String,
-)
-
-@Serializable
-data class PushMessage(
-    val eventCode: String,
-    val title: String,
-    val body: String,
 )
 
 class NotificationSendService(
@@ -68,32 +58,18 @@ class NotificationSendService(
             val title = resolved.subject ?: event.name
 
             val response = when (subscription.channelId) {
-                ChannelId.EMAIL -> {
+                ChannelId.EMAIL, ChannelId.PUSH -> {
                     val result = NotificationServerDefaults.dispatcher?.dispatch(
                         DispatchRequest(
                             userId      = request.userId,
                             title       = title,
-                            subject     = null,
+                            subject     = event.code,
                             body        = resolved.body,
-                            mergeFields = emptyMap(),
-                            channelId   = ChannelId.EMAIL,
+                            mergeFields = request.mergeFields,
+                            channelId   = subscription.channelId,
                         )
                     ) ?: return@map SendNotificationResponse(false, "Notification dispatcher not initialized")
                     SendNotificationResponse(result.success, result.message)
-                }
-                ChannelId.PUSH -> {
-                    val payload = Json.encodeToString(PushMessage(
-                        eventCode = event.code,
-                        title     = title,
-                        body      = resolved.body,
-                    ))
-                    WebSocketSessionManager.send(request.userId, payload)
-                    val connected = WebSocketSessionManager.isConnected(request.userId)
-                    SendNotificationResponse(
-                        success = true,
-                        message = if (connected) "Push sent to user ${request.userId}"
-                                  else "User ${request.userId} is not connected via WebSocket",
-                    )
                 }
                 ChannelId.TELEGRAM -> {
                     SendNotificationResponse(true, "Telegram message queued for user ${request.userId}")
