@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: ktor-noti-008-create-user-subscriptions
+      author: ktor-notification
+      changes:
+        - createTable:
+            tableName: user_subscriptions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: channel_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: user_subscriptions
+            columnNames: user_id,event_id,channel_id
+            constraintName: uq_user_event_channel
+        - addForeignKeyConstraint:
+            constraintName: fk_us_user_id
+            baseTableName: user_subscriptions
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            constraintName: fk_us_event_id
+            baseTableName: user_subscriptions
+            baseColumnNames: event_id
+            referencedTableName: event_notifications
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            constraintName: fk_us_channel_id
+            baseTableName: user_subscriptions
+            baseColumnNames: channel_id
+            referencedTableName: channels
+            referencedColumnNames: id

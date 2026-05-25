@@ -1,0 +1,102 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "kh.com.ktor",
+    "module": "notification",
+    "version": "0.0.1",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "8.14"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 21,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.21"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "notification-0.0.1.jar",
+          "url": "notification-0.0.1.jar",
+          "size": 57439,
+          "sha512": "1a78e06b72f95270ce652f4d8decfb565695a0520ea7b70b9ffa59bbe5813dd527a20ae37f145bd0ad1ccd74970e6925669950909bf31dba8f793a5d9d457e41",
+          "sha256": "3393c5bcea432f9aa0b9d4dd67459a778049f301ac66d34c204179c17053dd04",
+          "sha1": "cd125511b75dd801396e83796e5fb5be98a857f8",
+          "md5": "6a5140c2313258d1f6083060f71920c6"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.jvm.version": 21,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.2.21"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "notification-0.0.1.jar",
+          "url": "notification-0.0.1.jar",
+          "size": 57439,
+          "sha512": "1a78e06b72f95270ce652f4d8decfb565695a0520ea7b70b9ffa59bbe5813dd527a20ae37f145bd0ad1ccd74970e6925669950909bf31dba8f793a5d9d457e41",
+          "sha256": "3393c5bcea432f9aa0b9d4dd67459a778049f301ac66d34c204179c17053dd04",
+          "sha1": "cd125511b75dd801396e83796e5fb5be98a857f8",
+          "md5": "6a5140c2313258d1f6083060f71920c6"
+        }
+      ]
+    },
+    {
+      "name": "sourcesElements",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.usage": "java-runtime"
+      },
+      "files": [
+        {
+          "name": "notification-0.0.1-sources.jar",
+          "url": "notification-0.0.1-sources.jar",
+          "size": 12685,
+          "sha512": "6631fa23ccf9ac39c4d8ed7a7b1189d05162ffd0db8487f50fd045026505c6c7cb5a06a9a31cb2da318bb7ae7054169ec3e7349aa1453031019595132bff6280",
+          "sha256": "508e95299c0632763082beeab47bfb76973bc2d35f66870193d3ef205ba2f4c1",
+          "sha1": "369d8523d260a0a25f94ec2e22192038ba2d0a9c",
+          "md5": "6cb348670cefcdf1bfee4cbb019153c3"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: ktor-noti-010-create-audit-logs
+      author: ktor-notification
+      changes:
+        - createTable:
+            tableName: audit_log
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: activity
+                  type: VARCHAR(255)
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: description
+                  type: TEXT
+              - column:
+                  name: function
+                  type: VARCHAR(255)
+              - column:
+                  name: module
+                  type: VARCHAR(255)
+              - column:
+                  name: device
+                  type: VARCHAR(500)
+              - column:
+                  name: request_ip
+                  type: VARCHAR(100)
+              - column:
+                  name: location
+                  type: VARCHAR(255)
+              - column:
+                  name: status
+                  type: VARCHAR(255)
+              - column:
+                  name: activity_datetime
+                  type: TIMESTAMP
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: now()
+              - column:
+                  name: role_type
+                  type: VARCHAR(100)
+              - column:
+                  name: username
+                  type: VARCHAR(255)

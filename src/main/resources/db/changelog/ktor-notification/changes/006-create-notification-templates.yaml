@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet:
+      id: ktor-noti-006-create-notification-templates
+      author: ktor-notification
+      changes:
+        - createTable:
+            tableName: notification_templates
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: channel_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: subject
+                  type: VARCHAR(500)
+              - column:
+                  name: body
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+              - column:
+                  name: created_by
+                  type: BIGINT
+              - column:
+                  name: updated_by
+                  type: BIGINT
+        - addUniqueConstraint:
+            tableName: notification_templates
+            columnNames: event_id,channel_id
+            constraintName: uq_template_event_channel
+        - addForeignKeyConstraint:
+            constraintName: fk_nt_event_id
+            baseTableName: notification_templates
+            baseColumnNames: event_id
+            referencedTableName: event_notifications
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            constraintName: fk_nt_channel_id
+            baseTableName: notification_templates
+            baseColumnNames: channel_id
+            referencedTableName: channels
+            referencedColumnNames: id
