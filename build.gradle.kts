@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "kh.com.ktor"
-version = "0.0.2"
+version = "0.0.5"
 
 repositories {
     mavenCentral()

@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: reset-sequences
+      author: smig
+      runOnChange: false
+      changes:
+        - sql:
+            splitStatements: false
+            sql: |
+              DO $$
+              DECLARE r RECORD;
+              BEGIN
+                FOR r IN
+                  SELECT table_name, column_name
+                  FROM information_schema.columns
+                  WHERE table_schema = current_schema()
+                    AND column_default LIKE 'nextval(%'
+                LOOP
+                  EXECUTE format(
+                    'SELECT setval(pg_get_serial_sequence(%L, %L), COALESCE(MAX(%I), 1)) FROM %I',
+                    r.table_name, r.column_name, r.column_name, r.table_name
+                  );
+                END LOOP;
+              END $$;
