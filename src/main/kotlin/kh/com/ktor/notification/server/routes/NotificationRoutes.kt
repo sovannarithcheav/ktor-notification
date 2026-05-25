@@ -91,9 +91,10 @@ fun Routing.installNotificationRoutes(
                 if (templateUpdateHandler != null) {
                     templateUpdateHandler.invoke(call, id)
                 } else {
-                    val request = call.receive<NotificationTemplateUpdateRequest>()
+                    val request   = call.receive<NotificationTemplateUpdateRequest>()
+                    val updatedBy = optionalUser(call)?.userId
                     try {
-                        val (_, new) = templateService.applyUpdate(id, request) ?: return@put call.notFound()
+                        val (_, new) = templateService.applyUpdate(id, request, updatedBy) ?: return@put call.notFound()
                         call.ok(new)
                     } catch (e: NotificationException) {
                         call.unprocessable(e.message ?: e.code)

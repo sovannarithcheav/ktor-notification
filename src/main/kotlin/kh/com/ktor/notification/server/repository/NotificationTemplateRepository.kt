@@ -56,13 +56,14 @@ object NotificationTemplateRepository {
             .map { it.toNotificationTemplate() }
     }
 
-    fun update(id: Long, request: NotificationTemplateUpdateRequest): NotificationTemplate? = transaction {
+    fun update(id: Long, request: NotificationTemplateUpdateRequest, updatedBy: Long? = null): NotificationTemplate? = transaction {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val rows = NotificationTemplates.update({ NotificationTemplates.id eq id }) {
             it[NotificationTemplates.subject]   = request.subject
             it[NotificationTemplates.body]      = request.body
             it[NotificationTemplates.statusId]  = request.statusId
             it[NotificationTemplates.updatedAt] = now
+            it[NotificationTemplates.updatedBy] = updatedBy
         }
         if (rows > 0) findById(id) else null
     }

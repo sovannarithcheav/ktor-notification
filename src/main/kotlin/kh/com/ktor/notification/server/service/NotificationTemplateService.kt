@@ -44,6 +44,7 @@ open class NotificationTemplateService {
     fun applyUpdate(
         id: Long,
         request: NotificationTemplateUpdateRequest,
+        updatedBy: Long? = null,
     ): Pair<NotificationTemplateRes, NotificationTemplateRes>? {
         val old = NotificationTemplateRepository.findById(id) ?: return null
 
@@ -51,7 +52,7 @@ open class NotificationTemplateService {
             EventVariableRepository.replace(old.eventId, request.variables.map { it.id })
         }
 
-        val new = NotificationTemplateRepository.update(id, request) ?: return null
+        val new = NotificationTemplateRepository.update(id, request, updatedBy) ?: return null
         return enrich(listOf(old)).first() to enrich(listOf(new)).first()
     }
 
