@@ -54,6 +54,7 @@ class WebSocketChannel(
         body: String,
         subject: String?,
         mergeFields: Map<String, String>,
+        contentType: String,
     ): DispatchResult {
         val payload = Json.encodeToString(PushMessage(
             eventCode = subject ?: "",

@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/changelog/ktor-notification/changes/009-create-user-web-notifications.yaml
   - include:
       file: db/changelog/ktor-notification/changes/010-create-audit-logs.yaml
+  - include:
+      file: db/changelog/ktor-notification/changes/011-add-template-content-type.yaml

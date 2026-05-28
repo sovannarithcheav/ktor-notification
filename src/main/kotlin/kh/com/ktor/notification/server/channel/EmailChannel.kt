@@ -42,19 +42,20 @@ class EmailChannel(
         body: String,
         subject: String?,
         mergeFields: Map<String, String>,
+        contentType: String,
     ): DispatchResult {
         val email = userEmailResolver.resolve(userId)
             ?: return DispatchResult(false, "No email found for user $userId")
 
         return try {
-            sendMail(email, title, body)
+            sendMail(email, title, body, contentType)
             DispatchResult(true, "Email sent to $email")
         } catch (e: Exception) {
             DispatchResult(false, "Email failed: ${e.message}")
         }
     }
 
-    private fun sendMail(to: String, subject: String, body: String) {
+    private fun sendMail(to: String, subject: String, body: String, contentType: String) {
         val props = Properties().apply {
             put("mail.smtp.host", config.host)
             put("mail.smtp.port", config.port.toString())
@@ -75,7 +76,7 @@ class EmailChannel(
             setFrom(InternetAddress(config.from))
             setRecipients(Message.RecipientType.TO, InternetAddress.parse(to))
             setSubject(subject)
-            setText(body)
+            setContent(body, "$contentType; charset=utf-8")
         }
         Transport.send(message)
     }

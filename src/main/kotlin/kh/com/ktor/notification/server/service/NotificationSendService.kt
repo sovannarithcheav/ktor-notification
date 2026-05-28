@@ -67,6 +67,7 @@ class NotificationSendService(
                             body        = resolved.body,
                             mergeFields = request.mergeFields,
                             channelId   = subscription.channelId,
+                            contentType = resolved.contentType,
                         )
                     ) ?: return@map SendNotificationResponse(false, "Notification dispatcher not initialized")
                     SendNotificationResponse(result.success, result.message)

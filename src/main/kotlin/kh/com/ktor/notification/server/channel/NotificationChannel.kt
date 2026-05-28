@@ -10,6 +10,7 @@ interface NotificationChannel {
         body: String,
         subject: String? = null,
         mergeFields: Map<String, String> = emptyMap(),
+        contentType: String = "text/plain",
     ): DispatchResult
 }
 

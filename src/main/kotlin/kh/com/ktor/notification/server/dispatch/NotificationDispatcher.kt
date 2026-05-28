@@ -11,6 +11,7 @@ data class DispatchRequest(
     val body: String,
     val mergeFields: Map<String, String> = emptyMap(),
     val channelId: Long,
+    val contentType: String = "text/plain",
 )
 
 class NotificationDispatcher(private val channels: Map<Long, NotificationChannel>) {
@@ -27,6 +28,7 @@ class NotificationDispatcher(private val channels: Map<Long, NotificationChannel
             body        = resolved.body,
             subject     = request.subject,
             mergeFields = request.mergeFields,
+            contentType = request.contentType,
         )
     }
 }

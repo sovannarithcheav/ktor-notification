@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: ktor-noti-011-add-template-content-type
+      author: ktor-notification
+      changes:
+        - addColumn:
+            tableName: notification_templates
+            columns:
+              - column:
+                  name: content_type
+                  type: VARCHAR(64)
+                  defaultValue: text/plain
+                  constraints:
+                    nullable: false

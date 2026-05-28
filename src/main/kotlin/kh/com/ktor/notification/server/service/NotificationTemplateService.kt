@@ -38,7 +38,11 @@ open class NotificationTemplateService {
         val template = NotificationTemplateRepository.findByEventAndChannel(eventId, channelId)
             ?: return null
         val resolved = TemplateResolver.resolve(template.subject, template.body, mergeFields)
-        return ResolvedTemplate(subject = resolved.subject, body = resolved.body)
+        return ResolvedTemplate(
+            subject     = resolved.subject,
+            body        = resolved.body,
+            contentType = template.contentType,
+        )
     }
 
     fun applyUpdate(
@@ -70,18 +74,19 @@ open class NotificationTemplateService {
             val channel = channels[t.channelId]?.let { ChannelRes(it.id, it.name) }
                 ?: ChannelRes(t.channelId, "")
             NotificationTemplateRes(
-                id        = t.id,
-                name      = t.name,
-                event     = event,
-                channel   = channel,
-                subject   = t.subject,
-                body      = t.body,
-                status    = StatusEnum.fromId(t.statusId),
-                createdAt = t.createdAt,
-                updatedAt = t.updatedAt,
-                createdBy = t.createdBy,
-                updatedBy = t.updatedBy,
-                variables = t.variables,
+                id          = t.id,
+                name        = t.name,
+                event       = event,
+                channel     = channel,
+                subject     = t.subject,
+                body        = t.body,
+                status      = StatusEnum.fromId(t.statusId),
+                contentType = t.contentType,
+                createdAt   = t.createdAt,
+                updatedAt   = t.updatedAt,
+                createdBy   = t.createdBy,
+                updatedBy   = t.updatedBy,
+                variables   = t.variables,
             )
         }
     }
@@ -115,4 +120,5 @@ open class NotificationTemplateService {
 data class ResolvedTemplate(
     val subject: String?,
     val body: String,
+    val contentType: String = "text/plain",
 )
