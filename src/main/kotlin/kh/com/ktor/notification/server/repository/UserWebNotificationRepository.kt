@@ -17,6 +17,11 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 
+/**
+ * In-app push inbox. By contract only PUSH-channel dispatches are persisted here;
+ * email and telegram are recorded in `audit_log` only. The save gate lives in
+ * NotificationSendService — do not call [save] from non-push code paths.
+ */
 object UserWebNotificationRepository {
 
     fun save(create: UserWebNotificationCreate): UserWebNotification = transaction {

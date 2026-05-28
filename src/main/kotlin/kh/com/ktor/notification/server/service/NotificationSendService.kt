@@ -79,15 +79,19 @@ class NotificationSendService(
             }
 
             if (response.success) {
-                UserWebNotificationRepository.save(
-                    UserWebNotificationCreate(
-                        userId     = request.userId,
-                        title      = title,
-                        subject    = event.code,
-                        content    = resolved.body,
-                        categoryId = event.categoryId,
+                // user_web_notifications is the in-app push inbox. Only PUSH-channel
+                // dispatches land here; email/telegram stay in audit_log only.
+                if (subscription.channelId == ChannelId.PUSH) {
+                    UserWebNotificationRepository.save(
+                        UserWebNotificationCreate(
+                            userId     = request.userId,
+                            title      = title,
+                            subject    = event.code,
+                            content    = resolved.body,
+                            categoryId = event.categoryId,
+                        )
                     )
-                )
+                }
                 AuditLogService.log(
                     activity    = AuditAction.SEND,
                     function    = "send",
