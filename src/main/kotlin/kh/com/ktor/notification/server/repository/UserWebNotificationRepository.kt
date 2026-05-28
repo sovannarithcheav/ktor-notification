@@ -28,7 +28,7 @@ object UserWebNotificationRepository {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val id = UserWebNotifications.insertAndGetId {
             it[UserWebNotifications.userId]     = create.userId
-            it[UserWebNotifications.title]      = create.title
+            it[UserWebNotifications.eventCode]  = create.eventCode
             it[UserWebNotifications.subject]    = create.subject
             it[UserWebNotifications.content]    = create.content
             it[UserWebNotifications.eventDate]  = now
@@ -46,7 +46,7 @@ object UserWebNotificationRepository {
 
     fun findAll(userId: Long, read: Boolean? = null, pageReq: PageRequest = PageRequest.of(sort = "eventDate,desc")): List<UserWebNotification> = transaction {
         val orderCol = when (pageReq.sortBy) {
-            "title"     -> UserWebNotifications.title
+            "subject"   -> UserWebNotifications.subject
             "updatedAt" -> UserWebNotifications.updatedAt
             else        -> UserWebNotifications.eventDate
         }

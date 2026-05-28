@@ -19,12 +19,12 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: title
+                  name: subject
                   type: VARCHAR(255)
                   constraints:
                     nullable: false
               - column:
-                  name: subject
+                  name: event_code
                   type: VARCHAR(255)
                   constraints:
                     nullable: false

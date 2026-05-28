@@ -85,8 +85,8 @@ class NotificationSendService(
                     UserWebNotificationRepository.save(
                         UserWebNotificationCreate(
                             userId     = request.userId,
-                            title      = title,
-                            subject    = event.code,
+                            eventCode  = event.code,
+                            subject    = title,
                             content    = resolved.body,
                             categoryId = event.categoryId,
                         )

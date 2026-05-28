@@ -8,8 +8,8 @@ import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 
 object UserWebNotifications : LongIdTable("user_web_notifications") {
     val userId       = long("user_id").references(Users.id)
-    val title        = varchar("title", 255)
     val subject      = varchar("subject", 255)
+    val eventCode    = varchar("event_code", 255)
     val content      = text("content")
     val eventDate    = datetime("event_date")
     val read         = bool("read").default(false)
@@ -23,7 +23,7 @@ object UserWebNotifications : LongIdTable("user_web_notifications") {
 data class UserWebNotification(
     val id: Long = 0,
     val userId: Long,
-    val title: String,
+    val eventCode: String,
     val subject: String,
     val content: String,
     val eventDate: LocalDateTime,
@@ -36,7 +36,7 @@ data class UserWebNotification(
 
 data class UserWebNotificationCreate(
     val userId: Long,
-    val title: String,
+    val eventCode: String,
     val subject: String,
     val content: String,
     val categoryId: Long? = null,
@@ -45,7 +45,7 @@ data class UserWebNotificationCreate(
 fun ResultRow.toUserWebNotification() = UserWebNotification(
     id           = this[UserWebNotifications.id].value,
     userId       = this[UserWebNotifications.userId],
-    title        = this[UserWebNotifications.title],
+    eventCode    = this[UserWebNotifications.eventCode],
     subject      = this[UserWebNotifications.subject],
     content      = this[UserWebNotifications.content],
     eventDate    = this[UserWebNotifications.eventDate],
