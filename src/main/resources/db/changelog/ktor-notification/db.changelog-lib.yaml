@@ -21,3 +21,9 @@ databaseChangeLog:
       file: db/changelog/ktor-notification/changes/010-create-audit-logs.yaml
   - include:
       file: db/changelog/ktor-notification/changes/011-add-template-content-type.yaml
+  - include:
+      file: db/changelog/ktor-notification/changes/012-create-reminder-rules.yaml
+  - include:
+      file: db/changelog/ktor-notification/changes/013-create-reminder-event-dates.yaml
+  - include:
+      file: db/changelog/ktor-notification/changes/014-create-reminder-fires.yaml

@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: ktor-noti-013-create-reminder-event-dates
+      author: ktor-notification
+      changes:
+        - createTable:
+            tableName: reminder_event_dates
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints: { primaryKey: true, nullable: false }
+              - column:
+                  name: employee_id
+                  type: BIGINT
+                  constraints: { nullable: false }
+              - column:
+                  name: employee_name
+                  type: VARCHAR(255)
+                  constraints: { nullable: false }
+              - column:
+                  name: date_kind
+                  type: VARCHAR(64)
+                  constraints: { nullable: false }
+              - column:
+                  name: target_date
+                  type: DATE
+                  constraints: { nullable: false }
+              - column:
+                  name: metadata
+                  type: JSONB
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: now()
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+        - addUniqueConstraint:
+            tableName: reminder_event_dates
+            columnNames: employee_id, date_kind
+            constraintName: uq_reminder_event_dates_emp_kind
+        - createIndex:
+            tableName: reminder_event_dates
+            indexName: idx_reminder_event_dates_kind_date
+            columns:
+              - column: { name: date_kind }
+              - column: { name: target_date }
