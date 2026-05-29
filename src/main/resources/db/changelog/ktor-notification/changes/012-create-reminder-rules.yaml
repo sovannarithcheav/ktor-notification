@@ -53,4 +53,5 @@ databaseChangeLog:
             sql: |
               ALTER TABLE reminder_rules
                 ADD CONSTRAINT reminder_rules_offsets_nonempty CHECK (cardinality(offset_days) > 0),
+                ADD CONSTRAINT reminder_rules_offsets_nonnegative CHECK (0 <= ALL(offset_days)),
                 ADD CONSTRAINT reminder_rules_channels_nonempty CHECK (cardinality(channel_ids) > 0);
