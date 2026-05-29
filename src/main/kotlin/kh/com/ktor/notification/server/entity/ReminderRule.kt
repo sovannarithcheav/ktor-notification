@@ -9,9 +9,9 @@ import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 object ReminderRules : LongIdTable("reminder_rules") {
     val name        = varchar("name", 255)
     val dateKind    = varchar("date_kind", 64)
-    val offsetDays  = intArray("offset_days")
+    val offsetDays  = array<Int>("offset_days")
     val eventId     = long("event_id")
-    val channelIds  = longArray("channel_ids")
+    val channelIds  = array<Long>("channel_ids")
     val isActive    = bool("is_active")
     val createdAt   = datetime("created_at").nullable()
     val updatedAt   = datetime("updated_at").nullable()
@@ -23,9 +23,9 @@ data class ReminderRule(
     val id: Long,
     val name: String,
     val dateKind: String,
-    val offsetDays: IntList,
+    val offsetDays: List<Int>,
     val eventId: Long,
-    val channelIds: LongList,
+    val channelIds: List<Long>,
     val isActive: Boolean,
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null,
@@ -70,5 +70,5 @@ fun ResultRow.toReminderRule() = ReminderRule(
 )
 
 fun ReminderRule.toRes(eventCode: String? = null) = ReminderRuleRes(
-    id, name, dateKind, offsetDays.list, eventId, eventCode, channelIds.list, isActive,
+    id, name, dateKind, offsetDays, eventId, eventCode, channelIds, isActive,
 )
