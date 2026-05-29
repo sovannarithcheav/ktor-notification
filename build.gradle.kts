@@ -38,6 +38,7 @@ dependencies {
     compileOnly("org.jetbrains.exposed:exposed-core:0.54.0")
     compileOnly("org.jetbrains.exposed:exposed-jdbc:0.54.0")
     compileOnly("org.jetbrains.exposed:exposed-kotlin-datetime:0.54.0")
+    compileOnly("org.jetbrains.exposed:exposed-json:0.54.0")
 
     compileOnly("org.eclipse.angus:angus-mail:2.0.3")
     compileOnly("org.slf4j:slf4j-api:2.0.9")
