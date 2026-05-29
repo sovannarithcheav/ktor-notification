@@ -71,7 +71,7 @@ object NotificationTemplateRepository {
     }
 
     fun isVariableNameUsed(variableName: String): Boolean = transaction {
-        val placeholder = "%\${$variableName}%"
+        val placeholder = "%$variableName%"
         NotificationTemplates.selectAll()
             .where {
                 (NotificationTemplates.body like placeholder) or
