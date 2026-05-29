@@ -115,7 +115,10 @@ fun Routing.installNotificationRoutes(
             }
             put("/{id}") {
                 val id = call.parameters["id"]?.toLongOrNull() ?: return@put call.badRequest("Invalid id")
-                call.ok(variableService.update(id, call.receive()) ?: return@put call.notFound())
+                variableService.update(id, call.receive<VariableRequest>()).fold(
+                    onSuccess = { v -> if (v == null) call.notFound() else call.ok(v) },
+                    onFailure = { call.unprocessable(it.message ?: "Update rejected") },
+                )
             }
         }
 

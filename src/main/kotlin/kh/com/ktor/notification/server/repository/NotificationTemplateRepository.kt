@@ -15,7 +15,9 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
@@ -66,6 +68,16 @@ object NotificationTemplateRepository {
             it[NotificationTemplates.updatedBy] = updatedBy
         }
         if (rows > 0) findById(id) else null
+    }
+
+    fun isVariableNameUsed(variableName: String): Boolean = transaction {
+        val placeholder = "%\${$variableName}%"
+        NotificationTemplates.selectAll()
+            .where {
+                (NotificationTemplates.body like placeholder) or
+                (NotificationTemplates.subject like placeholder)
+            }
+            .count() > 0
     }
 
     private fun buildFilter(eventId: Long?, channelId: Long?, statusId: Long?): Op<Boolean> {
