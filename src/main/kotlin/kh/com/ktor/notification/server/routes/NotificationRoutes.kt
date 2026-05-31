@@ -44,6 +44,7 @@ fun Routing.installNotificationRoutes(
     basePath: String,
     templateService: NotificationTemplateService,
     templateUpdateHandler: (suspend ApplicationCall.(id: Long) -> Unit)?,
+    eventNotificationUpdateHandler: (suspend ApplicationCall.(id: Long) -> Unit)? = null,
 ) {
     val eventService        = EventNotificationService()
     val variableService     = VariableService()
@@ -67,7 +68,11 @@ fun Routing.installNotificationRoutes(
             }
             put("/{id}") {
                 val id = call.parameters["id"]?.toLongOrNull() ?: return@put call.badRequest("Invalid id")
-                call.ok(eventService.update(id, call.receive()) ?: return@put call.notFound())
+                if (eventNotificationUpdateHandler != null) {
+                    eventNotificationUpdateHandler.invoke(call, id)
+                } else {
+                    call.ok(eventService.update(id, call.receive()) ?: return@put call.notFound())
+                }
             }
         }
 
