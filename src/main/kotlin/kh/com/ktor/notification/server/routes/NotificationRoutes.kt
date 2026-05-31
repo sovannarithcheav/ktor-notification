@@ -57,7 +57,20 @@ fun Routing.installNotificationRoutes(
 
         // ── Event Notifications ─────────────────────────────────────────────
         route("/event-notifications") {
-            get           { call.ok(eventService.getAll()) }
+            get {
+                val p       = call.request.queryParameters
+                val pageReq = PageRequest.of(
+                    page = p["page"]?.toIntOrNull() ?: 0,
+                    size = p["size"]?.toIntOrNull() ?: 20,
+                    sort = p["sort"] ?: "id,asc",
+                )
+                call.ok(eventService.getAll(
+                    categoryId = p["categoryId"]?.toLongOrNull(),
+                    statusId   = p["statusId"]?.toLongOrNull(),
+                    search     = p["search"]?.takeIf { it.isNotBlank() },
+                    pageReq    = pageReq,
+                ))
+            }
             get("/options") { call.ok(eventService.getOptions()) }
             get("/{id}") {
                 val id = call.parameters["id"]?.toLongOrNull() ?: return@get call.badRequest("Invalid id")

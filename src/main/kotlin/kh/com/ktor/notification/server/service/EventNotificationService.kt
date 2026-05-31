@@ -5,12 +5,25 @@ import kh.com.ktor.notification.server.entity.EventNotification
 import kh.com.ktor.notification.server.entity.EventNotificationOption
 import kh.com.ktor.notification.server.entity.EventNotificationRequest
 import kh.com.ktor.notification.server.entity.EventNotificationRes
+import kh.com.ktor.notification.server.entity.PageRequest
+import kh.com.ktor.notification.server.entity.PageResponse
 import kh.com.ktor.notification.server.entity.toCategoryRes
 import kh.com.ktor.notification.server.enums.StatusEnum
 import kh.com.ktor.notification.server.repository.CategoryRepository
 import kh.com.ktor.notification.server.repository.EventNotificationRepository
 
 class EventNotificationService {
+
+    fun getAll(
+        categoryId: Long? = null,
+        statusId: Long? = null,
+        search: String? = null,
+        pageReq: PageRequest = PageRequest(),
+    ): PageResponse<EventNotificationRes> {
+        val total   = EventNotificationRepository.count(categoryId, statusId, search)
+        val content = enrich(EventNotificationRepository.findAll(categoryId, statusId, search, pageReq))
+        return PageResponse.of(content, pageReq, total)
+    }
 
     fun getAll(): List<EventNotificationRes> = enrich(EventNotificationRepository.findAll())
     fun getById(id: Long): EventNotificationRes? = EventNotificationRepository.findById(id)?.let { enrich(listOf(it)).first() }
