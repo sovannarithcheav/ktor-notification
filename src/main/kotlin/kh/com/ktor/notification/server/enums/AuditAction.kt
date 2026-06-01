@@ -7,4 +7,5 @@ enum class AuditAction {
     MARK_ALL_READ,
     CREATE,
     UPDATE,
+    REQUEST_UPDATE,
 }
