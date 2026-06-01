@@ -267,7 +267,6 @@ fun Routing.installNotificationRoutes(
                     sort = p["sort"] ?: "activityDatetime,desc",
                 )
                 call.ok(AuditLogService.findAll(
-                    userId      = p["userId"]?.toLongOrNull(),
                     activity    = p["activity"]?.takeIf { it.isNotBlank() },
                     module      = p["module"]?.takeIf { it.isNotBlank() },
                     function    = p["function"]?.takeIf { it.isNotBlank() },
