@@ -99,7 +99,6 @@ object EventNotificationRepository {
 
     fun update(id: Long, request: EventNotificationRequest): EventNotification? = transaction {
         val rows = EventNotifications.update({ EventNotifications.id eq id }) {
-            it[EventNotifications.code]        = request.code
             it[EventNotifications.name]        = request.name
             it[EventNotifications.description] = request.description
             it[EventNotifications.type]        = request.type
