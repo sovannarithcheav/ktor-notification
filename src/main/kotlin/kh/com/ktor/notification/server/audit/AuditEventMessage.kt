@@ -11,4 +11,5 @@ data class AuditEventMessage(
     val username:    String? = null,
     val roleType:    String? = null,
     val description: String? = null,
+    val referenceId: Long?   = null,
 )

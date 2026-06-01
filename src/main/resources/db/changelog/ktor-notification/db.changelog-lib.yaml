@@ -27,3 +27,5 @@ databaseChangeLog:
       file: db/changelog/ktor-notification/changes/013-create-reminder-event-dates.yaml
   - include:
       file: db/changelog/ktor-notification/changes/014-create-reminder-fires.yaml
+  - include:
+      file: db/changelog/ktor-notification/changes/015-add-audit-log-reference-id.yaml

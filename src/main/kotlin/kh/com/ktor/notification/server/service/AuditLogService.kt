@@ -17,6 +17,7 @@ object AuditLogService {
         userId: Long? = null,
         description: String? = null,
         status: String = "SUCCESS",
+        referenceId: Long? = null,
     ) {
         AuditLogRepository.save(
             userId      = user?.userId ?: userId,
@@ -29,6 +30,7 @@ object AuditLogService {
             requestIp   = user?.ip,
             roleType    = user?.roleType,
             username    = user?.username,
+            referenceId = referenceId,
         )
     }
 
@@ -38,10 +40,11 @@ object AuditLogService {
         module: String? = null,
         function: String? = null,
         status: String? = null,
+        referenceId: Long? = null,
         pageReq: PageRequest = PageRequest.of(sort = "activityDatetime,desc"),
     ): PageResponse<AuditLog> {
-        val content = AuditLogRepository.findAll(userId, activity, module, function, status, pageReq)
-        val total   = AuditLogRepository.count(userId, activity, module, function, status)
+        val content = AuditLogRepository.findAll(userId, activity, module, function, status, referenceId, pageReq)
+        val total   = AuditLogRepository.count(userId, activity, module, function, status, referenceId)
         return PageResponse.of(content, pageReq, total)
     }
 }

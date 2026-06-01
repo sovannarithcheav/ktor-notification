@@ -36,6 +36,7 @@ class AuditEventConsumer {
                         username    = msg.username,
                         roleType    = msg.roleType,
                         description = msg.description,
+                        referenceId = msg.referenceId,
                     )
                     channel.basicAck(delivery.envelope.deliveryTag, false)
                 } catch (_: Exception) {

@@ -31,6 +31,7 @@ object AuditLogRepository {
         roleType: String? = null,
         username: String? = null,
         location: String? = null,
+        referenceId: Long? = null,
     ): AuditLog = transaction {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val id = AuditLogs.insertAndGetId {
@@ -45,6 +46,7 @@ object AuditLogRepository {
             it[AuditLogs.roleType]         = roleType
             it[AuditLogs.username]         = username
             it[AuditLogs.location]         = location
+            it[AuditLogs.referenceId]      = referenceId
             it[AuditLogs.activityDatetime] = now
             it[AuditLogs.createdAt]        = now
         }
@@ -57,10 +59,11 @@ object AuditLogRepository {
         module: String? = null,
         function: String? = null,
         status: String? = null,
+        referenceId: Long? = null,
         pageReq: PageRequest = PageRequest.of(sort = "activityDatetime,desc"),
     ): List<AuditLog> = transaction {
         AuditLogs.selectAll()
-            .where { buildFilter(userId, activity, module, function, status) }
+            .where { buildFilter(userId, activity, module, function, status, referenceId) }
             .orderBy(AuditLogs.activityDatetime to pageReq.order())
             .limit(pageReq.size, offset = pageReq.offset)
             .map { it.toAuditLog() }
@@ -72,15 +75,18 @@ object AuditLogRepository {
         module: String? = null,
         function: String? = null,
         status: String? = null,
+        referenceId: Long? = null,
     ): Long = transaction {
-        AuditLogs.selectAll().where { buildFilter(userId, activity, module, function, status) }.count()
+        AuditLogs.selectAll().where { buildFilter(userId, activity, module, function, status, referenceId) }.count()
     }
 
     private fun buildFilter(
         userId: Long?, activity: String?, module: String?, function: String?, status: String?,
+        referenceId: Long? = null,
     ): Op<Boolean> {
         val conditions = buildList {
-            userId?.let   { add(AuditLogs.userId   eq it) }
+            userId?.let      { add(AuditLogs.userId      eq it) }
+            referenceId?.let { add(AuditLogs.referenceId eq it) }
             activity?.let { add(AuditLogs.activity.lowerCase() like "%${it.lowercase()}%") }
             module?.let   { add(AuditLogs.module.lowerCase()   like "%${it.lowercase()}%") }
             function?.let { add(AuditLogs.function.lowerCase() like "%${it.lowercase()}%") }
