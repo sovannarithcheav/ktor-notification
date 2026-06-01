@@ -28,6 +28,7 @@ import kh.com.ktor.notification.server.entity.VariableRequest
 import kh.com.ktor.notification.server.security.NotificationException
 import kh.com.ktor.notification.server.security.currentUser
 import kh.com.ktor.notification.server.security.optionalUser
+import kh.com.ktor.notification.server.enums.AuditAction
 import kh.com.ktor.notification.server.service.AuditLogService
 import kh.com.ktor.notification.server.service.CategoryService
 import kh.com.ktor.notification.server.service.EventNotificationService
@@ -75,14 +76,33 @@ fun Routing.installNotificationRoutes(
                 call.ok(eventService.getById(id) ?: return@get call.notFound())
             }
             post {
-                call.created(eventService.create(call.receive<EventNotificationRequest>()))
+                val user    = optionalUser(call)
+                val request = call.receive<EventNotificationRequest>()
+                val result  = eventService.create(request)
+                AuditLogService.log(
+                    activity    = AuditAction.CREATE,
+                    function    = "create",
+                    module      = "EventNotification",
+                    user        = user,
+                    description = "code=${request.code} name=${request.name}",
+                )
+                call.created(result)
             }
             put("/{id}") {
                 val id = call.parameters["id"]?.toLongOrNull() ?: return@put call.badRequest("Invalid id")
                 if (eventNotificationUpdateHandler != null) {
                     eventNotificationUpdateHandler.invoke(call, id)
                 } else {
-                    call.ok(eventService.update(id, call.receive()) ?: return@put call.notFound())
+                    val request = call.receive<EventNotificationRequest>()
+                    val result  = eventService.update(id, request) ?: return@put call.notFound()
+                    AuditLogService.log(
+                        activity    = AuditAction.UPDATE,
+                        function    = "update",
+                        module      = "EventNotification",
+                        user        = optionalUser(call),
+                        description = "id=$id code=${request.code}",
+                    )
+                    call.ok(result)
                 }
             }
         }
