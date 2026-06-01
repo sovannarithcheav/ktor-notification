@@ -24,7 +24,7 @@ class NotificationHistoryService {
         if (updated) AuditLogService.log(
             activity    = AuditAction.MARK_READ,
             function    = "markAsRead",
-            module      = "NotificationHistory",
+            module      = "notification-history",
             user        = user,
             description = "notificationId=$id",
         )
@@ -36,7 +36,7 @@ class NotificationHistoryService {
         if (updated > 0) AuditLogService.log(
             activity    = AuditAction.MARK_ALL_READ,
             function    = "markAllAsRead",
-            module      = "NotificationHistory",
+            module      = "notification-history",
             user        = user,
             description = "$updated notifications marked as read",
         )

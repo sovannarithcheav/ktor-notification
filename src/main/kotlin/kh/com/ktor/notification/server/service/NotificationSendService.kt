@@ -95,7 +95,7 @@ class NotificationSendService(
                 AuditLogService.log(
                     activity    = AuditAction.SEND,
                     function    = "send",
-                    module      = "NotificationSend",
+                    module      = "notification-send",
                     user        = caller,
                     userId      = request.userId,
                     description = "event=${event.code} channelId=${subscription.channelId}",

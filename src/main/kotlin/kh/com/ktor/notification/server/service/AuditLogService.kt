@@ -20,7 +20,7 @@ object AuditLogService {
     ) {
         AuditLogRepository.save(
             userId      = user?.userId ?: userId,
-            activity    = activity,
+            activity    = activity.name.lowercase(),
             function    = function,
             module      = module,
             description = description,

@@ -77,7 +77,7 @@ class NotificationSubscriptionService {
         AuditLogService.log(
             activity    = AuditAction.SUBSCRIBE,
             function    = "subscribe",
-            module      = "Subscription",
+            module      = "subscription",
             user        = user,
             description = "eventId=${req.eventId} channels=${req.channelIds}",
         )

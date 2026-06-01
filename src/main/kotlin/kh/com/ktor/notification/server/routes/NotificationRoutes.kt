@@ -82,7 +82,7 @@ fun Routing.installNotificationRoutes(
                 AuditLogService.log(
                     activity    = AuditAction.CREATE,
                     function    = "create",
-                    module      = "EventNotification",
+                    module      = "event-notification",
                     user        = user,
                     description = "code=${request.code} name=${request.name}",
                 )
@@ -98,7 +98,7 @@ fun Routing.installNotificationRoutes(
                     AuditLogService.log(
                         activity    = AuditAction.UPDATE,
                         function    = "update",
-                        module      = "EventNotification",
+                        module      = "event-notification",
                         user        = optionalUser(call),
                         description = "id=$id code=${request.code}",
                     )

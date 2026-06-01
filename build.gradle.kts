@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "kh.com.ktor"
-version = "0.0.16"
+version = "0.0.18"
 
 repositories {
     mavenCentral()
@@ -40,6 +40,7 @@ dependencies {
     compileOnly("org.jetbrains.exposed:exposed-kotlin-datetime:0.54.0")
     compileOnly("org.jetbrains.exposed:exposed-json:0.54.0")
 
+    implementation("com.rabbitmq:amqp-client:5.21.0")
     compileOnly("org.eclipse.angus:angus-mail:2.0.3")
     compileOnly("org.slf4j:slf4j-api:2.0.9")
 }

@@ -5,7 +5,6 @@ import kh.com.ktor.notification.server.entity.AuditLogs
 import kh.com.ktor.notification.server.entity.PageRequest
 import kh.com.ktor.notification.server.entity.order
 import kh.com.ktor.notification.server.entity.toAuditLog
-import kh.com.ktor.notification.server.enums.AuditAction
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -22,7 +21,7 @@ object AuditLogRepository {
 
     fun save(
         userId: Long? = null,
-        activity: AuditAction,
+        activity: String,
         function: String,
         module: String,
         description: String? = null,
@@ -36,7 +35,7 @@ object AuditLogRepository {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val id = AuditLogs.insertAndGetId {
             it[AuditLogs.userId]           = userId
-            it[AuditLogs.activity]         = activity.name
+            it[AuditLogs.activity]         = activity
             it[AuditLogs.function]         = function
             it[AuditLogs.module]           = module
             it[AuditLogs.description]      = description
