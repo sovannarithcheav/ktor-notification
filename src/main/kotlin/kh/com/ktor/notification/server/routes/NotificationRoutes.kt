@@ -4,14 +4,12 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
-import io.ktor.server.routing.Route
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import kh.com.ktor.notification.server.NotificationServerDefaults
-import kh.com.ktor.notification.server.common.accepted
 import kh.com.ktor.notification.server.common.badRequest
 import kh.com.ktor.notification.server.common.created
 import kh.com.ktor.notification.server.common.noContent
