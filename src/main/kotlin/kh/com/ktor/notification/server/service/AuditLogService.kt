@@ -18,21 +18,22 @@ object AuditLogService {
         description: String? = null,
         status: String = "SUCCESS",
         referenceId: Long? = null,
-    ) {
-        AuditLogRepository.save(
-            userId      = user?.userId ?: userId,
-            activity    = activity.name.lowercase(),
-            function    = function,
-            module      = module,
-            description = description,
-            status      = status,
-            device      = user?.device,
-            requestIp   = user?.ip,
-            roleType    = user?.roleType,
-            username    = user?.username,
-            referenceId = referenceId,
-        )
-    }
+    ): Long = AuditLogRepository.save(
+        userId      = user?.userId ?: userId,
+        activity    = activity.name.lowercase(),
+        function    = function,
+        module      = module,
+        description = description,
+        status      = status,
+        device      = user?.device,
+        requestIp   = user?.ip,
+        roleType    = user?.roleType,
+        username    = user?.username,
+        referenceId = referenceId,
+    ).id
+
+    fun findPriorRequestId(module: String, entityId: Long): Long? =
+        AuditLogRepository.findPriorId(module, "request-update", entityId)
 
     fun findAll(
         userId: Long? = null,

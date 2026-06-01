@@ -9,6 +9,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.and
@@ -78,6 +79,19 @@ object AuditLogRepository {
         referenceId: Long? = null,
     ): Long = transaction {
         AuditLogs.selectAll().where { buildFilter(userId, activity, module, function, status, referenceId) }.count()
+    }
+
+    fun findPriorId(module: String, function: String, entityId: Long): Long? = transaction {
+        AuditLogs.selectAll()
+            .where {
+                (AuditLogs.module   eq module)   and
+                (AuditLogs.function eq function) and
+                (AuditLogs.description like "id=$entityId %")
+            }
+            .orderBy(AuditLogs.id to SortOrder.DESC)
+            .limit(1)
+            .map { it[AuditLogs.id].value }
+            .firstOrNull()
     }
 
     private fun buildFilter(
