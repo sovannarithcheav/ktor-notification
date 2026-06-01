@@ -29,6 +29,7 @@ import kh.com.ktor.notification.server.security.NotificationException
 import kh.com.ktor.notification.server.security.currentUser
 import kh.com.ktor.notification.server.security.optionalUser
 import kh.com.ktor.notification.server.enums.AuditAction
+import kh.com.ktor.notification.server.repository.AuditLogRepository
 import kh.com.ktor.notification.server.service.AuditLogService
 import kh.com.ktor.notification.server.service.CategoryService
 import kh.com.ktor.notification.server.service.EventNotificationService
@@ -266,7 +267,7 @@ fun Routing.installNotificationRoutes(
                     sort = p["sort"] ?: "activityDatetime,desc",
                 )
                 call.ok(AuditLogService.findAll(
-                    userId      = p["userId"]?.toLongOrNull() ?: user.userId,
+                    userId      = p["userId"]?.toLongOrNull(),
                     activity    = p["activity"]?.takeIf { it.isNotBlank() },
                     module      = p["module"]?.takeIf { it.isNotBlank() },
                     function    = p["function"]?.takeIf { it.isNotBlank() },
@@ -274,6 +275,11 @@ fun Routing.installNotificationRoutes(
                     referenceId = p["referenceId"]?.toLongOrNull(),
                     pageReq     = pageReq,
                 ))
+            }
+            get("/{id}") {
+                val id  = call.parameters["id"]?.toLongOrNull() ?: return@get call.badRequest("Invalid id")
+                val log = AuditLogRepository.findById(id)       ?: return@get call.notFound()
+                call.ok(log)
             }
         }
     }

@@ -81,6 +81,10 @@ object AuditLogRepository {
         AuditLogs.selectAll().where { buildFilter(userId, activity, module, function, status, referenceId) }.count()
     }
 
+    fun findById(id: Long): AuditLog? = transaction {
+        AuditLogs.selectAll().where { AuditLogs.id eq id }.map { it.toAuditLog() }.firstOrNull()
+    }
+
     fun findPriorId(module: String, function: String, entityId: Long): Long? = transaction {
         AuditLogs.selectAll()
             .where {
