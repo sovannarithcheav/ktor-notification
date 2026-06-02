@@ -28,10 +28,10 @@ class AuditEventConsumer {
             { _, delivery ->
                 try {
                     val msg = Json.decodeFromString<AuditEventMessage>(String(delivery.body, Charsets.UTF_8))
-                    // Chain non-root workflow rows (approve/reject/cancel) back to their
-                    // request-* root via request_change_id, unless an explicit referenceId was given.
+                    // Chain workflow rows back to their root via request_change_id.
+                    // Root record: no prior row exists yet → lookup returns null → referenceId = null.
+                    // Follow-on rows (approve/reject/cancel): root already saved → lookup returns its id.
                     val referenceId = msg.referenceId ?: msg.requestChangeId
-                        ?.takeIf { !msg.activity.startsWith("request-") }
                         ?.let { AuditLogRepository.findRootByRequestChangeId(it) }
                     AuditLogRepository.save(
                         activity        = msg.activity,

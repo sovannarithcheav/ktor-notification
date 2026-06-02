@@ -7,7 +7,6 @@ import kh.com.ktor.notification.server.entity.NotificationSubscriptionRes
 import kh.com.ktor.notification.server.entity.NotificationSubscriptionView
 import kh.com.ktor.notification.server.entity.PageRequest
 import kh.com.ktor.notification.server.entity.PageResponse
-import kh.com.ktor.notification.server.enums.AuditAction
 import kh.com.ktor.notification.server.enums.ChannelEnum
 import kh.com.ktor.notification.server.repository.ChannelRepository
 import kh.com.ktor.notification.server.repository.EventNotificationRepository
@@ -75,11 +74,11 @@ class NotificationSubscriptionService {
 
         UserSubscriptionRepository.subscribe(user.userId, req.eventId, req.channelIds)
         AuditLogService.log(
-            activity    = AuditAction.SUBSCRIBE,
-            function    = "subscribe",
+            activity    = "subscribe",
+            function    = "notification",
             module      = "subscription",
             user        = user,
-            description = "eventId=${req.eventId} channels=${req.channelIds}",
+            description = "Subscribed to event #${req.eventId} (channels: ${req.channelIds.joinToString()})",
         )
 
         return NotificationSubscriptionRes(

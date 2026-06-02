@@ -14,6 +14,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
 import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -45,8 +46,8 @@ object AuditLogRepository {
             it[AuditLogs.status]           = status
             it[AuditLogs.device]           = device
             it[AuditLogs.requestIp]        = requestIp
-            it[AuditLogs.roleType]         = roleType
-            it[AuditLogs.username]         = username
+            it[AuditLogs.roleType]         = roleType ?: "SYSTEM"
+            it[AuditLogs.username]         = username ?: "system"
             it[AuditLogs.location]         = location
             it[AuditLogs.referenceId]      = referenceId
             it[AuditLogs.requestChangeId]  = requestChangeId
@@ -64,10 +65,11 @@ object AuditLogRepository {
         status: String? = null,
         referenceId: Long? = null,
         requestChangeId: Long? = null,
+        excludeActivities: List<String>? = null,
         pageReq: PageRequest = PageRequest.of(sort = "activityDatetime,desc"),
     ): List<AuditLog> = transaction {
         AuditLogs.selectAll()
-            .where { buildFilter(userId, activity, module, function, status, referenceId, requestChangeId) }
+            .where { buildFilter(userId, activity, module, function, status, referenceId, requestChangeId, excludeActivities) }
             .orderBy(AuditLogs.activityDatetime to pageReq.order())
             .limit(pageReq.size, offset = pageReq.offset)
             .map { it.toAuditLog() }
@@ -81,8 +83,9 @@ object AuditLogRepository {
         status: String? = null,
         referenceId: Long? = null,
         requestChangeId: Long? = null,
+        excludeActivities: List<String>? = null,
     ): Long = transaction {
-        AuditLogs.selectAll().where { buildFilter(userId, activity, module, function, status, referenceId, requestChangeId) }.count()
+        AuditLogs.selectAll().where { buildFilter(userId, activity, module, function, status, referenceId, requestChangeId, excludeActivities) }.count()
     }
 
     fun findById(id: Long): AuditLog? = transaction {
@@ -102,13 +105,18 @@ object AuditLogRepository {
             .firstOrNull()
     }
 
-    /** The chain root for a request: its `request-*` row. Used to resolve reference_id. */
+    fun findDistinctFunctions(): List<String> = transaction {
+        AuditLogs.select(AuditLogs.function)
+            .where { AuditLogs.function.isNotNull() }
+            .withDistinct()
+            .orderBy(AuditLogs.function to SortOrder.ASC)
+            .mapNotNull { it[AuditLogs.function] }
+    }
+
+    /** The chain root for a requestChangeId: the first audit record saved for it. */
     fun findRootByRequestChangeId(requestChangeId: Long): Long? = transaction {
         AuditLogs.selectAll()
-            .where {
-                (AuditLogs.requestChangeId eq requestChangeId) and
-                (AuditLogs.activity like "request-%")
-            }
+            .where { AuditLogs.requestChangeId eq requestChangeId }
             .orderBy(AuditLogs.id to SortOrder.ASC)
             .limit(1)
             .map { it[AuditLogs.id].value }
@@ -117,12 +125,15 @@ object AuditLogRepository {
 
     private fun buildFilter(
         userId: Long?, activity: String?, module: String?, function: String?, status: String?,
-        referenceId: Long? = null, requestChangeId: Long? = null,
+        referenceId: Long? = null, requestChangeId: Long? = null, excludeActivities: List<String>? = null,
     ): Op<Boolean> {
         val conditions = buildList {
             userId?.let          { add(AuditLogs.userId          eq it) }
             referenceId?.let     { add(AuditLogs.referenceId     eq it) }
             requestChangeId?.let { add(AuditLogs.requestChangeId eq it) }
+            excludeActivities?.takeIf { it.isNotEmpty() }?.let { ex ->
+                add(AuditLogs.activity.lowerCase() notInList ex.map { it.lowercase() })
+            }
             activity?.let { add(AuditLogs.activity.lowerCase() like "%${it.lowercase()}%") }
             module?.let   { add(AuditLogs.module.lowerCase()   like "%${it.lowercase()}%") }
             function?.let { add(AuditLogs.function.lowerCase() like "%${it.lowercase()}%") }

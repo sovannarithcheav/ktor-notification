@@ -3,7 +3,6 @@ package kh.com.ktor.notification.server.service
 import kh.com.ktor.notification.server.NotificationServerDefaults
 import kh.com.ktor.notification.server.dispatch.DispatchRequest
 import kh.com.ktor.notification.server.entity.UserWebNotificationCreate
-import kh.com.ktor.notification.server.enums.AuditAction
 import kh.com.ktor.notification.server.repository.EventNotificationRepository
 import kh.com.ktor.notification.server.repository.UserSubscriptionRepository
 import kh.com.ktor.notification.server.repository.UserWebNotificationRepository
@@ -92,13 +91,12 @@ class NotificationSendService(
                         )
                     )
                 }
-                AuditLogService.log(
-                    activity    = AuditAction.SEND,
-                    function    = "send",
-                    module      = "notification-send",
+                if (caller != null) AuditLogService.log(
+                    activity    = "send",
+                    function    = "notification",
+                    module      = "notification",
                     user        = caller,
-                    userId      = request.userId,
-                    description = "event=${event.code} channelId=${subscription.channelId}",
+                    description = "Sent ${event.code} notification to user #${request.userId} via channel ${subscription.channelId}",
                 )
             }
 

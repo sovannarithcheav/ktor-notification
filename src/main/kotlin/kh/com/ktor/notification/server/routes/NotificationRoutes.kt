@@ -29,7 +29,6 @@ import kh.com.ktor.notification.server.entity.VariableRequest
 import kh.com.ktor.notification.server.security.NotificationException
 import kh.com.ktor.notification.server.security.currentUser
 import kh.com.ktor.notification.server.security.optionalUser
-import kh.com.ktor.notification.server.enums.AuditAction
 import kh.com.ktor.notification.server.repository.AuditLogRepository
 import kh.com.ktor.notification.server.service.AuditLogService
 import kh.com.ktor.notification.server.service.CategoryService
@@ -82,11 +81,11 @@ fun Routing.installNotificationRoutes(
                 val request = call.receive<EventNotificationRequest>()
                 val result  = eventService.create(request)
                 AuditLogService.log(
-                    activity    = AuditAction.CREATE,
-                    function    = "create",
+                    activity    = "create",
+                    function    = "notification",
                     module      = "event-notification",
                     user        = user,
-                    description = "code=${request.code} name=${request.name}",
+                    description = "Event notification '${request.code}' created (${request.name})",
                 )
                 call.created(result)
             }
@@ -98,11 +97,11 @@ fun Routing.installNotificationRoutes(
                     val request = call.receive<EventNotificationRequest>()
                     val result  = eventService.update(id, request) ?: return@put call.notFound()
                     AuditLogService.log(
-                        activity    = AuditAction.UPDATE,
-                        function    = "update",
+                        activity    = "update",
+                        function    = "notification",
                         module      = "event-notification",
                         user        = optionalUser(call),
-                        description = "id=$id code=${request.code}",
+                        description = "Event notification #$id updated — code: ${request.code}",
                     )
                     call.ok(result)
                 }
@@ -274,6 +273,7 @@ fun Routing.installNotificationRoutes(
                     status          = p["status"]?.takeIf { it.isNotBlank() },
                     referenceId     = p["referenceId"]?.toLongOrNull(),
                     requestChangeId = p["requestChangeId"]?.toLongOrNull(),
+                    excludeActivities = p.getAll("excludeActivity")?.filter { it.isNotBlank() }?.takeIf { it.isNotEmpty() },
                     pageReq         = pageReq,
                 ))
             }
@@ -293,6 +293,9 @@ fun Routing.installNotificationRoutes(
                     requestChangeId = body.requestChangeId,
                 )
                 call.created(mapOf("id" to id))
+            }
+            get("/functions") {
+                call.ok(AuditLogRepository.findDistinctFunctions())
             }
             get("/{id}") {
                 val id  = call.parameters["id"]?.toLongOrNull() ?: return@get call.badRequest("Invalid id")

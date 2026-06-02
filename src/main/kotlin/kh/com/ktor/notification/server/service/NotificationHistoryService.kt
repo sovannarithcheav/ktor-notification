@@ -3,7 +3,6 @@ package kh.com.ktor.notification.server.service
 import kh.com.ktor.notification.server.entity.PageRequest
 import kh.com.ktor.notification.server.entity.PageResponse
 import kh.com.ktor.notification.server.entity.UserWebNotification
-import kh.com.ktor.notification.server.enums.AuditAction
 import kh.com.ktor.notification.server.repository.UserWebNotificationRepository
 import kh.com.ktor.notification.server.security.UserInfo
 
@@ -20,27 +19,11 @@ class NotificationHistoryService {
     }
 
     fun markAsRead(id: Long, user: UserInfo): Boolean {
-        val updated = UserWebNotificationRepository.markAsRead(id, user.userId)
-        if (updated) AuditLogService.log(
-            activity    = AuditAction.MARK_READ,
-            function    = "markAsRead",
-            module      = "notification-history",
-            user        = user,
-            description = "notificationId=$id",
-        )
-        return updated
+        return UserWebNotificationRepository.markAsRead(id, user.userId)
     }
 
     fun markAllAsRead(user: UserInfo): Int {
-        val updated = UserWebNotificationRepository.markAllAsRead(user.userId)
-        if (updated > 0) AuditLogService.log(
-            activity    = AuditAction.MARK_ALL_READ,
-            function    = "markAllAsRead",
-            module      = "notification-history",
-            user        = user,
-            description = "$updated notifications marked as read",
-        )
-        return updated
+        return UserWebNotificationRepository.markAllAsRead(user.userId)
     }
 
     fun countUnread(userId: Long): Long = UserWebNotificationRepository.countUnread(userId)

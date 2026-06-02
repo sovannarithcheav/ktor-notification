@@ -19,11 +19,14 @@ object AuditLogService {
         status: String = "SUCCESS",
         referenceId: Long? = null,
         requestChangeId: Long? = null,
+        username: String? = null,
+        roleType: String? = null,
     ): Long = log(
         activity = activity.name.lowercase(),
         function = function, module = module, user = user, userId = userId,
         description = description, status = status,
         referenceId = referenceId, requestChangeId = requestChangeId,
+        username = username, roleType = roleType,
     )
 
     /** Free-string activity (for activities outside the AuditAction enum, e.g. login/switch-role). */
@@ -37,6 +40,8 @@ object AuditLogService {
         status: String = "SUCCESS",
         referenceId: Long? = null,
         requestChangeId: Long? = null,
+        username: String? = null,
+        roleType: String? = null,
     ): Long = AuditLogRepository.save(
         userId          = user?.userId ?: userId,
         activity        = activity,
@@ -46,8 +51,8 @@ object AuditLogService {
         status          = status,
         device          = user?.device,
         requestIp       = user?.ip,
-        roleType        = user?.roleType,
-        username        = user?.username,
+        roleType        = roleType ?: user?.roleType,
+        username        = username ?: user?.username,
         referenceId     = referenceId,
         requestChangeId = requestChangeId,
     ).id
@@ -63,10 +68,11 @@ object AuditLogService {
         status: String? = null,
         referenceId: Long? = null,
         requestChangeId: Long? = null,
+        excludeActivities: List<String>? = null,
         pageReq: PageRequest = PageRequest.of(sort = "activityDatetime,desc"),
     ): PageResponse<AuditLog> {
-        val content = AuditLogRepository.findAll(userId, activity, module, function, status, referenceId, requestChangeId, pageReq)
-        val total   = AuditLogRepository.count(userId, activity, module, function, status, referenceId, requestChangeId)
+        val content = AuditLogRepository.findAll(userId, activity, module, function, status, referenceId, requestChangeId, excludeActivities, pageReq)
+        val total   = AuditLogRepository.count(userId, activity, module, function, status, referenceId, requestChangeId, excludeActivities)
         return PageResponse.of(content, pageReq, total)
     }
 }

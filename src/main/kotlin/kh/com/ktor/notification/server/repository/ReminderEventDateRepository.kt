@@ -8,6 +8,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.JsonObject
+import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.and
@@ -18,6 +19,13 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 
 object ReminderEventDateRepository {
+
+    fun findAll(dateKind: String? = null, employeeId: Long? = null): List<ReminderEventDate> = transaction {
+        ReminderEventDates.selectAll().where {
+            (dateKind?.let { ReminderEventDates.dateKind eq it } ?: Op.TRUE) and
+            (employeeId?.let { ReminderEventDates.employeeId eq it } ?: Op.TRUE)
+        }.orderBy(ReminderEventDates.employeeId).map { it.toReminderEventDate() }
+    }
 
     fun findMatchesForOffsets(dateKind: String, dates: List<LocalDate>): List<ReminderEventDate> = transaction {
         if (dates.isEmpty()) return@transaction emptyList()
@@ -64,9 +72,18 @@ object ReminderEventDateRepository {
         findByEmployeeKind(employeeId, dateKind)!!
     }
 
+    fun findById(id: Long): ReminderEventDate? = transaction {
+        ReminderEventDates.selectAll().where { ReminderEventDates.id eq id }
+            .map { it.toReminderEventDate() }.firstOrNull()
+    }
+
     fun delete(employeeId: Long, dateKind: String): Int = transaction {
         ReminderEventDates.deleteWhere {
             (ReminderEventDates.employeeId eq employeeId) and (ReminderEventDates.dateKind eq dateKind)
         }
+    }
+
+    fun deleteById(id: Long): Int = transaction {
+        ReminderEventDates.deleteWhere { ReminderEventDates.id eq id }
     }
 }
