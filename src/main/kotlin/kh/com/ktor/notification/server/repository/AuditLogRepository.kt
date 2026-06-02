@@ -33,6 +33,7 @@ object AuditLogRepository {
         username: String? = null,
         location: String? = null,
         referenceId: Long? = null,
+        requestChangeId: Long? = null,
     ): AuditLog = transaction {
         val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val id = AuditLogs.insertAndGetId {
@@ -48,6 +49,7 @@ object AuditLogRepository {
             it[AuditLogs.username]         = username
             it[AuditLogs.location]         = location
             it[AuditLogs.referenceId]      = referenceId
+            it[AuditLogs.requestChangeId]  = requestChangeId
             it[AuditLogs.activityDatetime] = now
             it[AuditLogs.createdAt]        = now
         }
@@ -61,10 +63,11 @@ object AuditLogRepository {
         function: String? = null,
         status: String? = null,
         referenceId: Long? = null,
+        requestChangeId: Long? = null,
         pageReq: PageRequest = PageRequest.of(sort = "activityDatetime,desc"),
     ): List<AuditLog> = transaction {
         AuditLogs.selectAll()
-            .where { buildFilter(userId, activity, module, function, status, referenceId) }
+            .where { buildFilter(userId, activity, module, function, status, referenceId, requestChangeId) }
             .orderBy(AuditLogs.activityDatetime to pageReq.order())
             .limit(pageReq.size, offset = pageReq.offset)
             .map { it.toAuditLog() }
@@ -77,8 +80,9 @@ object AuditLogRepository {
         function: String? = null,
         status: String? = null,
         referenceId: Long? = null,
+        requestChangeId: Long? = null,
     ): Long = transaction {
-        AuditLogs.selectAll().where { buildFilter(userId, activity, module, function, status, referenceId) }.count()
+        AuditLogs.selectAll().where { buildFilter(userId, activity, module, function, status, referenceId, requestChangeId) }.count()
     }
 
     fun findById(id: Long): AuditLog? = transaction {
@@ -98,13 +102,27 @@ object AuditLogRepository {
             .firstOrNull()
     }
 
+    /** The chain root for a request: its `request-*` row. Used to resolve reference_id. */
+    fun findRootByRequestChangeId(requestChangeId: Long): Long? = transaction {
+        AuditLogs.selectAll()
+            .where {
+                (AuditLogs.requestChangeId eq requestChangeId) and
+                (AuditLogs.activity like "request-%")
+            }
+            .orderBy(AuditLogs.id to SortOrder.ASC)
+            .limit(1)
+            .map { it[AuditLogs.id].value }
+            .firstOrNull()
+    }
+
     private fun buildFilter(
         userId: Long?, activity: String?, module: String?, function: String?, status: String?,
-        referenceId: Long? = null,
+        referenceId: Long? = null, requestChangeId: Long? = null,
     ): Op<Boolean> {
         val conditions = buildList {
-            userId?.let      { add(AuditLogs.userId      eq it) }
-            referenceId?.let { add(AuditLogs.referenceId eq it) }
+            userId?.let          { add(AuditLogs.userId          eq it) }
+            referenceId?.let     { add(AuditLogs.referenceId     eq it) }
+            requestChangeId?.let { add(AuditLogs.requestChangeId eq it) }
             activity?.let { add(AuditLogs.activity.lowerCase() like "%${it.lowercase()}%") }
             module?.let   { add(AuditLogs.module.lowerCase()   like "%${it.lowercase()}%") }
             function?.let { add(AuditLogs.function.lowerCase() like "%${it.lowercase()}%") }

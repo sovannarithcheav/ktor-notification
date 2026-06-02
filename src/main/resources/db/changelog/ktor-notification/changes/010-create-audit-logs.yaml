@@ -53,3 +53,6 @@ databaseChangeLog:
               - column:
                   name: username
                   type: VARCHAR(255)
+              - column:
+                  name: request_change_id
+                  type: BIGINT

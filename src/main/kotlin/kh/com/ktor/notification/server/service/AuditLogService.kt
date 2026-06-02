@@ -18,18 +18,38 @@ object AuditLogService {
         description: String? = null,
         status: String = "SUCCESS",
         referenceId: Long? = null,
+        requestChangeId: Long? = null,
+    ): Long = log(
+        activity = activity.name.lowercase(),
+        function = function, module = module, user = user, userId = userId,
+        description = description, status = status,
+        referenceId = referenceId, requestChangeId = requestChangeId,
+    )
+
+    /** Free-string activity (for activities outside the AuditAction enum, e.g. login/switch-role). */
+    fun log(
+        activity: String,
+        function: String,
+        module: String,
+        user: UserInfo? = null,
+        userId: Long? = null,
+        description: String? = null,
+        status: String = "SUCCESS",
+        referenceId: Long? = null,
+        requestChangeId: Long? = null,
     ): Long = AuditLogRepository.save(
-        userId      = user?.userId ?: userId,
-        activity    = activity.name.lowercase(),
-        function    = function,
-        module      = module,
-        description = description,
-        status      = status,
-        device      = user?.device,
-        requestIp   = user?.ip,
-        roleType    = user?.roleType,
-        username    = user?.username,
-        referenceId = referenceId,
+        userId          = user?.userId ?: userId,
+        activity        = activity,
+        function        = function,
+        module          = module,
+        description     = description,
+        status          = status,
+        device          = user?.device,
+        requestIp       = user?.ip,
+        roleType        = user?.roleType,
+        username        = user?.username,
+        referenceId     = referenceId,
+        requestChangeId = requestChangeId,
     ).id
 
     fun findPriorRequestId(module: String, entityId: Long): Long? =
@@ -42,10 +62,11 @@ object AuditLogService {
         function: String? = null,
         status: String? = null,
         referenceId: Long? = null,
+        requestChangeId: Long? = null,
         pageReq: PageRequest = PageRequest.of(sort = "activityDatetime,desc"),
     ): PageResponse<AuditLog> {
-        val content = AuditLogRepository.findAll(userId, activity, module, function, status, referenceId, pageReq)
-        val total   = AuditLogRepository.count(userId, activity, module, function, status, referenceId)
+        val content = AuditLogRepository.findAll(userId, activity, module, function, status, referenceId, requestChangeId, pageReq)
+        val total   = AuditLogRepository.count(userId, activity, module, function, status, referenceId, requestChangeId)
         return PageResponse.of(content, pageReq, total)
     }
 }

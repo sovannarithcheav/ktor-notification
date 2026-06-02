@@ -9,6 +9,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import kotlinx.serialization.Serializable
 import kh.com.ktor.notification.server.NotificationServerDefaults
 import kh.com.ktor.notification.server.common.badRequest
 import kh.com.ktor.notification.server.common.created
@@ -267,13 +268,31 @@ fun Routing.installNotificationRoutes(
                     sort = p["sort"] ?: "activityDatetime,desc",
                 )
                 call.ok(AuditLogService.findAll(
-                    activity    = p["activity"]?.takeIf { it.isNotBlank() },
-                    module      = p["module"]?.takeIf { it.isNotBlank() },
-                    function    = p["function"]?.takeIf { it.isNotBlank() },
-                    status      = p["status"]?.takeIf { it.isNotBlank() },
-                    referenceId = p["referenceId"]?.toLongOrNull(),
-                    pageReq     = pageReq,
+                    activity        = p["activity"]?.takeIf { it.isNotBlank() },
+                    module          = p["module"]?.takeIf { it.isNotBlank() },
+                    function        = p["function"]?.takeIf { it.isNotBlank() },
+                    status          = p["status"]?.takeIf { it.isNotBlank() },
+                    referenceId     = p["referenceId"]?.toLongOrNull(),
+                    requestChangeId = p["requestChangeId"]?.toLongOrNull(),
+                    pageReq         = pageReq,
                 ))
+            }
+            // Record a generic activity (login / logout / switch-role / …). Identity comes from
+            // the caller's headers; activity is a free string.
+            post {
+                val user = currentUser(call) ?: return@post
+                val body = call.receive<RecordAuditRequest>()
+                val id = AuditLogService.log(
+                    activity        = body.activity,
+                    function        = body.function,
+                    module          = body.module,
+                    user            = user,
+                    description     = body.description,
+                    status          = body.status ?: "SUCCESS",
+                    referenceId     = body.referenceId,
+                    requestChangeId = body.requestChangeId,
+                )
+                call.created(mapOf("id" to id))
             }
             get("/{id}") {
                 val id  = call.parameters["id"]?.toLongOrNull() ?: return@get call.badRequest("Invalid id")
@@ -283,3 +302,14 @@ fun Routing.installNotificationRoutes(
         }
     }
 }
+
+@Serializable
+data class RecordAuditRequest(
+    val activity: String,
+    val module: String,
+    val function: String,
+    val description: String? = null,
+    val status: String? = null,
+    val referenceId: Long? = null,
+    val requestChangeId: Long? = null,
+)

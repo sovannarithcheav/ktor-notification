@@ -28,15 +28,21 @@ class AuditEventConsumer {
             { _, delivery ->
                 try {
                     val msg = Json.decodeFromString<AuditEventMessage>(String(delivery.body, Charsets.UTF_8))
+                    // Chain non-root workflow rows (approve/reject/cancel) back to their
+                    // request-* root via request_change_id, unless an explicit referenceId was given.
+                    val referenceId = msg.referenceId ?: msg.requestChangeId
+                        ?.takeIf { !msg.activity.startsWith("request-") }
+                        ?.let { AuditLogRepository.findRootByRequestChangeId(it) }
                     AuditLogRepository.save(
-                        activity    = msg.activity,
-                        function    = msg.function,
-                        module      = msg.module,
-                        userId      = msg.userId,
-                        username    = msg.username,
-                        roleType    = msg.roleType,
-                        description = msg.description,
-                        referenceId = msg.referenceId,
+                        activity        = msg.activity,
+                        function        = msg.function,
+                        module          = msg.module,
+                        userId          = msg.userId,
+                        username        = msg.username,
+                        roleType        = msg.roleType,
+                        description     = msg.description,
+                        referenceId     = referenceId,
+                        requestChangeId = msg.requestChangeId,
                     )
                     channel.basicAck(delivery.envelope.deliveryTag, false)
                 } catch (_: Exception) {

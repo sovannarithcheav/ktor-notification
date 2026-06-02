@@ -21,6 +21,7 @@ object AuditLogs : LongIdTable("audit_log") {
     val roleType         = varchar("role_type", 100).nullable()
     val username         = varchar("username", 255).nullable()
     val referenceId      = long("reference_id").nullable()
+    val requestChangeId  = long("request_change_id").nullable()
 }
 
 @Serializable
@@ -40,6 +41,7 @@ data class AuditLog(
     val roleType: String? = null,
     val username: String? = null,
     val referenceId: Long? = null,
+    val requestChangeId: Long? = null,
 )
 
 fun ResultRow.toAuditLog() = AuditLog(
@@ -58,4 +60,5 @@ fun ResultRow.toAuditLog() = AuditLog(
     roleType         = this[AuditLogs.roleType],
     username         = this[AuditLogs.username],
     referenceId      = this[AuditLogs.referenceId],
+    requestChangeId  = this[AuditLogs.requestChangeId],
 )
