@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "kh.com.ktor"
-version = "0.0.33"
+version = "0.1.0"
 
 repositories {
     mavenCentral()
@@ -22,6 +22,7 @@ repositories {
 
 dependencies {
     compileOnly("kh.com.ktor:plugins:0.0.8")
+    compileOnly("kh.com.ktor:security:0.0.1")
 
     compileOnly("io.ktor:ktor-server-core-jvm:3.1.1")
     compileOnly("io.ktor:ktor-server-websockets-jvm:3.1.1")

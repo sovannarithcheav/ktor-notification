@@ -4,6 +4,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import kh.com.ktor.security.userContext
 
 data class UserInfo(
     val userId: Long,
@@ -13,30 +14,37 @@ data class UserInfo(
     val device: String? = null,
 )
 
+// ip / device are request metadata (not identity) — kept from the request, not the token.
+private fun ApplicationCall.clientIp(): String? =
+    request.headers["X-Forwarded-For"]?.split(",")?.firstOrNull()?.trim()
+        ?: request.local.remoteAddress
+
+private fun ApplicationCall.device(): String? = request.headers["User-Agent"]
+
+/** Identity from the validated JWT ([userContext]) — null if absent. No X-* headers. */
 fun optionalUser(call: ApplicationCall): UserInfo? {
-    val userId = call.request.headers["X-User-Id"]?.toLongOrNull() ?: return null
+    val ctx = call.userContext() ?: return null
     return UserInfo(
-        userId   = userId,
-        username = call.request.headers["X-Username"] ?: "",
-        roleType = call.request.headers["X-Role-Type"] ?: "All",
-        ip       = call.request.headers["X-Forwarded-For"]?.split(",")?.firstOrNull()?.trim()
-                   ?: call.request.local.remoteAddress,
-        device   = call.request.headers["User-Agent"],
+        userId   = ctx.userId,
+        username = ctx.username ?: "",
+        roleType = ctx.roleType ?: "All",
+        ip       = call.clientIp(),
+        device   = call.device(),
     )
 }
 
+/** Identity from the validated JWT, or respond 401. */
 suspend fun currentUser(call: ApplicationCall): UserInfo? {
-    val userId = call.request.headers["X-User-Id"]?.toLongOrNull()
-    if (userId == null) {
-        call.respond(HttpStatusCode.Unauthorized, "Missing X-User-Id header")
+    val ctx = call.userContext()
+    if (ctx == null) {
+        call.respond(HttpStatusCode.Unauthorized, "Missing or invalid bearer token")
         return null
     }
     return UserInfo(
-        userId   = userId,
-        username = call.request.headers["X-Username"] ?: "",
-        roleType = call.request.headers["X-Role-Type"] ?: "All",
-        ip       = call.request.headers["X-Forwarded-For"]?.split(",")?.firstOrNull()?.trim()
-                   ?: call.request.local.remoteAddress,
-        device   = call.request.headers["User-Agent"],
+        userId   = ctx.userId,
+        username = ctx.username ?: "",
+        roleType = ctx.roleType ?: "All",
+        ip       = call.clientIp(),
+        device   = call.device(),
     )
 }
