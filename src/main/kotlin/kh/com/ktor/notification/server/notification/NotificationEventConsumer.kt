@@ -31,7 +31,7 @@ class NotificationEventConsumer(private val service: NotificationSendService = N
                 try {
                     val msg = Json.decodeFromString<NotificationEventMessage>(String(delivery.body, Charsets.UTF_8))
                     runBlocking {
-                        service.send(SendNotificationRequest(msg.userId, msg.eventCode, msg.mergeFields))
+                        service.send(SendNotificationRequest(msg.userId, msg.eventCode, msg.mergeFields, msg.forceChannels))
                     }
                     channel.basicAck(delivery.envelope.deliveryTag, false)
                 } catch (_: Exception) {

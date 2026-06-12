@@ -21,6 +21,7 @@ data class SendNotificationRequest(
     val userId: Long,
     val eventCode: String,
     val mergeFields: Map<String, String> = emptyMap(),
+    val forceChannels: List<Int> = emptyList(),
 )
 
 @Serializable
@@ -37,26 +38,32 @@ class NotificationSendService(
         val event = EventNotificationRepository.findByCode(request.eventCode)
             ?: return listOf(SendNotificationResponse(false, "Event '${request.eventCode}' not found"))
 
-        val subscriptions = UserSubscriptionRepository.findByUserIdAndEventId(request.userId, event.id)
-            .ifEmpty {
-                val defaultChannel = if (event.isRequired) ChannelId.PUSH else ChannelId.NONE
-                UserSubscriptionRepository.subscribe(
-                    userId     = request.userId,
-                    eventId    = event.id,
-                    channelIds = listOf(defaultChannel),
-                )
+        val channelIds: List<Long> =
+            if (request.forceChannels.isNotEmpty()) {
+                request.forceChannels.map { it.toLong() }
+            } else {
+                UserSubscriptionRepository.findByUserIdAndEventId(request.userId, event.id)
+                    .ifEmpty {
+                        val defaultChannel = if (event.isRequired) ChannelId.PUSH else ChannelId.NONE
+                        UserSubscriptionRepository.subscribe(
+                            userId     = request.userId,
+                            eventId    = event.id,
+                            channelIds = listOf(defaultChannel),
+                        )
+                    }
+                    .map { it.channelId }
             }
 
-        return subscriptions.filter { it.channelId != ChannelId.NONE }.map { subscription ->
-            val resolved = templateService.resolve(event.id, subscription.channelId, request.mergeFields)
+        return channelIds.filter { it != ChannelId.NONE }.map { channelId ->
+            val resolved = templateService.resolve(event.id, channelId, request.mergeFields)
                 ?: return@map SendNotificationResponse(
                     false,
-                    "No template found for event '${request.eventCode}' on channelId ${subscription.channelId}",
+                    "No template found for event '${request.eventCode}' on channelId $channelId",
                 )
 
             val title = resolved.subject ?: event.name
 
-            val response = when (subscription.channelId) {
+            val response = when (channelId) {
                 ChannelId.EMAIL, ChannelId.PUSH -> {
                     val result = NotificationServerDefaults.dispatcher?.dispatch(
                         DispatchRequest(
@@ -65,7 +72,7 @@ class NotificationSendService(
                             subject     = event.code,
                             body        = resolved.body,
                             mergeFields = request.mergeFields,
-                            channelId   = subscription.channelId,
+                            channelId   = channelId,
                             contentType = resolved.contentType,
                         )
                     ) ?: return@map SendNotificationResponse(false, "Notification dispatcher not initialized")
@@ -74,13 +81,13 @@ class NotificationSendService(
                 ChannelId.TELEGRAM -> {
                     SendNotificationResponse(true, "Telegram message queued for user ${request.userId}")
                 }
-                else -> SendNotificationResponse(false, "Channel ${subscription.channelId} is not supported")
+                else -> SendNotificationResponse(false, "Channel $channelId is not supported")
             }
 
             if (response.success) {
                 // user_web_notifications is the in-app push inbox. Only PUSH-channel
                 // dispatches land here; email/telegram stay in audit_log only.
-                if (subscription.channelId == ChannelId.PUSH) {
+                if (channelId == ChannelId.PUSH) {
                     UserWebNotificationRepository.save(
                         UserWebNotificationCreate(
                             userId     = request.userId,
@@ -96,7 +103,7 @@ class NotificationSendService(
                     function    = "notification",
                     module      = "notification",
                     user        = caller,
-                    description = "Sent ${event.code} notification to user #${request.userId} via channel ${subscription.channelId}",
+                    description = "Sent ${event.code} notification to user #${request.userId} via channel $channelId",
                 )
             }
 
