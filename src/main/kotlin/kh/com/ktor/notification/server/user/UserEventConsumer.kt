@@ -1,15 +1,13 @@
-package kh.com.ktor.notification.server.notification
+package kh.com.ktor.notification.server.user
 
 import com.rabbitmq.client.ConnectionFactory
-import kh.com.ktor.notification.server.service.NotificationSendService
-import kh.com.ktor.notification.server.service.SendNotificationRequest
-import kotlinx.coroutines.runBlocking
+import kh.com.ktor.notification.server.repository.UserRepository
 import kotlinx.serialization.json.Json
 
-class NotificationEventConsumer(private val service: NotificationSendService = NotificationSendService()) {
+class UserEventConsumer {
 
-    private val EXCHANGE = "notification.events"
-    private val QUEUE    = "notification.messages"
+    private val EXCHANGE = "user.events"
+    private val QUEUE    = "notification.users"
 
     fun start(host: String, port: Int, username: String, password: String) {
         val factory = ConnectionFactory().apply {
@@ -23,15 +21,16 @@ class NotificationEventConsumer(private val service: NotificationSendService = N
 
         channel.exchangeDeclare(EXCHANGE, "topic", true)
         channel.queueDeclare(QUEUE, true, false, false, null)
-        channel.queueBind(QUEUE, EXCHANGE, "notification")
+        channel.queueBind(QUEUE, EXCHANGE, "user")
         channel.basicQos(1)
 
         channel.basicConsume(QUEUE, false,
             { _, delivery ->
                 try {
-                    val msg = Json.decodeFromString<NotificationEventMessage>(String(delivery.body, Charsets.UTF_8))
-                    runBlocking {
-                        service.send(SendNotificationRequest(msg.userId, msg.eventCode, msg.mergeFields, msg.forceChannels))
+                    val msg = Json.decodeFromString<UserSyncMessage>(String(delivery.body, Charsets.UTF_8))
+                    // Resolution table is email-keyed and email is NOT NULL: skip (ack) users with no email.
+                    if (!msg.email.isNullOrBlank()) {
+                        UserRepository.upsert(msg.id, msg.email, msg.fullName)
                     }
                     channel.basicAck(delivery.envelope.deliveryTag, false)
                 } catch (_: Exception) {
